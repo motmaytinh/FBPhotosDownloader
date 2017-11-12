@@ -1,0 +1,5 @@
+# Python binary code
+*.pyc
+
+# Photos
+*.jpg
