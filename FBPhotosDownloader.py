@@ -6,14 +6,13 @@ import os
 
 ACESS_TOKEN = "902628199904076|PEW80o6zhsRTEQlwLSZ0ZTphUw4"
 ALBUM_PARAM_URL = "https://graph.facebook.com/{PAGE_ID}/albums?fields=count,name,description&access_token={TOKEN}"
-PHOTOS_PARAM_URL = "https://graph.facebook.com/{ALBUM_ID}/photos?access_token={TOKEN}"
+PHOTOS_PARAM_URL = "https://graph.facebook.com/v2.11/{ALBUM_ID}/photos/uploaded?limit=40&access_token={TOKEN}"
 PHOTO_URL = "https://graph.facebook.com/v2.11/{PHOTOS_ID}?fields=images&access_token={TOKEN}"
 
 def album_list_getter(in_page_id):
     """Return list of albums of page"""
 
     album_node_url = ALBUM_PARAM_URL.format(PAGE_ID=in_page_id, TOKEN=ACESS_TOKEN)
-    #print album_node_url
     return_album_node = urllib.urlopen(album_node_url)
     album_node = json.loads(return_album_node.read())
     return album_node['data']
@@ -40,9 +39,6 @@ def get_photo_list(album_id):
 def download_photos(album_name, album_id, file_name):
     """Download photos and save to folder."""
 
-    if album_id == "all":
-        return
-
     photo_list = get_photo_list(album_id)
 
     newpath = "./" + album_name
@@ -67,7 +63,10 @@ def main():
             page_id = raw_input("Please enter a page id: ")
             album_list = album_list_getter(page_id)
             index = print_album_list(album_list)
-            download_photos(album_list[index]['name'], album_list[index]['id'], album_list[index]['name'])
+            if index == -1:
+                download_photos(page_id, page_id, page_id)
+            else:
+                download_photos(album_list[index]['name'], album_list[index]['id'], album_list[index]['name'])
             break
         elif choice in ('a', 'A'):
             album_id = raw_input("Please enter an album id: ")

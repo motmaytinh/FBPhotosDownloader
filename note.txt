@@ -1,4 +1,4 @@
 To do:
-Download all photos on page
+Download photos from user timeline
 Implement stop and resume feature
 Handler next cursor
