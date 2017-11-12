@@ -1,3 +1,5 @@
+"""FB Photos Downloader"""
+
 import urllib
 import json
 import os
@@ -28,17 +30,20 @@ def print_album_list(album_list):
     choice = raw_input("Please enter your choice (0 for all): ")
     return -1 if (int(choice) == 0) else int(choice) - 1
 
-def download_photos(album_name, album_id, file_name):
-    album_url = ""
-
-    if album_id == "all":
-        return
-    else:
-        album_url = PHOTOS_PARAM_URL.format(ALBUM_ID=album_id, TOKEN=ACESS_TOKEN)
+def get_photo_list(album_id):
+    album_url = PHOTOS_PARAM_URL.format(ALBUM_ID=album_id, TOKEN=ACESS_TOKEN)
 
     return_album = urllib.urlopen(album_url)
     album_data = json.loads(return_album.read())
-    photo_list = album_data['data']
+    return album_data['data']
+
+def download_photos(album_name, album_id, file_name):
+    """Download photos and save to folder."""
+
+    if album_id == "all":
+        return
+
+    photo_list = get_photo_list(album_id)
 
     #newpath = "/img" + album_name
     #if not os.path.exists(newpath):
@@ -53,12 +58,21 @@ def download_photos(album_name, album_id, file_name):
 
     return
 
-PAGE_NAME = "the.girl.magz"
-
 def main():
-    album_list = album_list_getter(PAGE_NAME)
-    id = print_album_list(album_list)
-    download_photos(album_list[id]['name'], album_list[id]['id'], album_list[id]['name'])
+    """Program starting point"""
+
+    while True:
+        choice = raw_input("Do you have a page ID or album ID (P/A): ")
+        if choice in ('p', 'P'):
+            page_id = raw_input("Please enter a page id: ")
+            album_list = album_list_getter(page_id)
+            index = print_album_list(album_list)
+            download_photos(album_list[index]['name'], album_list[index]['id'], album_list[index]['name'])
+            break
+        elif choice in ('a', 'A'):
+            album_id = raw_input("Please enter an album id: ")
+            download_photos('name', album_id, 'Gai xinh')
+            break
 
     print 'Done'
 

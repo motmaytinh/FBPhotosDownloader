@@ -1,0 +1,3 @@
+To do:
+Create a directory for each album
+Implement stop and resume feature
