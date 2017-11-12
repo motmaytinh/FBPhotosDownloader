@@ -3,7 +3,6 @@
 import urllib
 import json
 import os
-import stat
 
 ACESS_TOKEN = "902628199904076|PEW80o6zhsRTEQlwLSZ0ZTphUw4"
 ALBUM_PARAM_URL = "https://graph.facebook.com/{PAGE_ID}/albums?fields=count,name,description&access_token={TOKEN}"
@@ -31,6 +30,7 @@ def print_album_list(album_list):
     return -1 if (int(choice) == 0) else int(choice) - 1
 
 def get_photo_list(album_id):
+    """Return list of photo in album"""
     album_url = PHOTOS_PARAM_URL.format(ALBUM_ID=album_id, TOKEN=ACESS_TOKEN)
 
     return_album = urllib.urlopen(album_url)
@@ -45,16 +45,16 @@ def download_photos(album_name, album_id, file_name):
 
     photo_list = get_photo_list(album_id)
 
-    #newpath = "/img" + album_name
-    #if not os.path.exists(newpath):
-    #    os.makedirs(newpath, mode=0o777)
+    newpath = "./" + album_name
+    if not os.path.exists(newpath):
+        os.makedirs(newpath, mode=0o777)
 
     for i in range(len(photo_list)):
         photo_url = PHOTO_URL.format(PHOTOS_ID=photo_list[i]['id'], TOKEN=ACESS_TOKEN)
         return_photo = urllib.urlopen(photo_url)
         photo_links = json.loads(return_photo.read())
         image_link = photo_links['images'][0]['source']
-        urllib.urlretrieve(image_link, file_name + str(i) + '.jpg')
+        urllib.urlretrieve(image_link, newpath + '/' + file_name + str(i) + '.jpg')
 
     return
 

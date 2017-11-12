@@ -1,3 +1,4 @@
 To do:
-Create a directory for each album
+Download all photos on page
 Implement stop and resume feature
+Handler next cursor
