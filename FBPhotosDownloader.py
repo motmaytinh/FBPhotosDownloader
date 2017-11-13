@@ -8,6 +8,7 @@ ACESS_TOKEN = "902628199904076|PEW80o6zhsRTEQlwLSZ0ZTphUw4"
 ALBUM_PARAM_URL = "https://graph.facebook.com/{PAGE_ID}/albums?fields=count,name,description&access_token={TOKEN}"
 PHOTOS_PARAM_URL = "https://graph.facebook.com/v2.11/{ALBUM_ID}/photos/uploaded?limit=40&access_token={TOKEN}"
 PHOTO_URL = "https://graph.facebook.com/v2.11/{PHOTOS_ID}?fields=images&access_token={TOKEN}"
+FILE_NAME = "log.txt"
 
 def album_list_getter(in_page_id):
     """Return list of albums of page"""
@@ -45,12 +46,34 @@ def download_photos(album_name, album_id, file_name):
     if not os.path.exists(newpath):
         os.makedirs(newpath, mode=0o777)
 
+    downloaded = set([])
+    log_file_path = newpath + '/' + FILE_NAME
+    check = False
+    if os.path.exists(log_file_path):
+        check = True
+        log = open(log_file_path, 'r+')
+        for line in log:
+            downloaded.add(int(line))
+    else:
+        log = open(log_file_path, 'w')
+        
+
     for i in range(len(photo_list)):
-        photo_url = PHOTO_URL.format(PHOTOS_ID=photo_list[i]['id'], TOKEN=ACESS_TOKEN)
+        photo_id = int(photo_list[i]['id'])
+        if check:
+            if photo_id in downloaded:
+                print "Photo downloaded"
+                continue
+        photo_url = PHOTO_URL.format(PHOTOS_ID=photo_id, TOKEN=ACESS_TOKEN)
         return_photo = urllib.urlopen(photo_url)
         photo_links = json.loads(return_photo.read())
         image_link = photo_links['images'][0]['source']
-        urllib.urlretrieve(image_link, newpath + '/' + file_name + str(i) + '.jpg')
+        urllib.urlretrieve(image_link, '{}/{} {}.jpg'.format(newpath, file_name, i))
+        log.write(photo_list[i]['id'] + '\n')
+        print '{} photo(s) downloaded.'.format(i + 1)
+
+    log.close()
+    os.remove(log_file_path)
 
     return
 
@@ -58,7 +81,7 @@ def main():
     """Program starting point"""
 
     while True:
-        choice = raw_input("Do you have a page ID or album ID (P/A): ")
+        choice = raw_input("Do you have a (p)age ID or (a)lbum ID: ")
         if choice in ('p', 'P'):
             page_id = raw_input("Please enter a page id: ")
             album_list = album_list_getter(page_id)

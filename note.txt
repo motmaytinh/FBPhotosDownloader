@@ -1,4 +1,4 @@
 To do:
 Download photos from user timeline
-Implement stop and resume feature
+Handle error
 Handler next cursor

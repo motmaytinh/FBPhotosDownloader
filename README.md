@@ -2,6 +2,13 @@
 
 This is a tiny app run on CLI to download photos from facebook.
 
+# Main features
+
+* Download albums from page by page id.
+* Download photos from page by page id.
+* Download albums by album id.
+* Able to stop and resume download.
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
