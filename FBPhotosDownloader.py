@@ -27,20 +27,23 @@ def print_album_list(album_list):
         print "{}. {} ({} photo(s))".format(i + 1, album_list[i]['name'], album_list[i]['count'])
 
     choice = raw_input("Please enter your choice (0 for all): ")
-    return -1 if (int(choice) == 0) else int(choice) - 1
+    return int(choice) - 1
 
-def get_photo_list(album_id):
+def get_photo_list(album_url):
     """Return list of photo in album"""
-    album_url = PHOTOS_PARAM_URL.format(ALBUM_ID=album_id, TOKEN=ACESS_TOKEN)
 
     return_album = urllib.urlopen(album_url)
     album_data = json.loads(return_album.read())
-    return album_data['data']
+    try:
+        return album_data['data'], album_data['paging']['next']
+    except Exception:
+        return album_data['data'], ''
+    
 
 def download_photos(album_name, album_id, file_name):
     """Download photos and save to folder."""
 
-    photo_list = get_photo_list(album_id)
+    photo_list, next_pointer = get_photo_list(PHOTOS_PARAM_URL.format(ALBUM_ID=album_id, TOKEN=ACESS_TOKEN))
 
     newpath = "./" + album_name
     if not os.path.exists(newpath):
@@ -56,21 +59,28 @@ def download_photos(album_name, album_id, file_name):
             downloaded.add(int(line))
     else:
         log = open(log_file_path, 'w')
-        
 
-    for i in range(len(photo_list)):
-        photo_id = int(photo_list[i]['id'])
-        if check:
-            if photo_id in downloaded:
-                print "Photo downloaded"
-                continue
-        photo_url = PHOTO_URL.format(PHOTOS_ID=photo_id, TOKEN=ACESS_TOKEN)
-        return_photo = urllib.urlopen(photo_url)
-        photo_links = json.loads(return_photo.read())
-        image_link = photo_links['images'][0]['source']
-        urllib.urlretrieve(image_link, '{}/{} {}.jpg'.format(newpath, file_name, i))
-        log.write(photo_list[i]['id'] + '\n')
-        print '{} photo(s) downloaded.'.format(i + 1)
+    count = 0
+    while True:
+        for photo in photo_list:
+            photo_id = int(photo['id'])
+            if check:
+                if photo_id in downloaded:
+                    print "Photo downloaded"
+                    continue
+            photo_url = PHOTO_URL.format(PHOTOS_ID=photo_id, TOKEN=ACESS_TOKEN)
+            return_photo = urllib.urlopen(photo_url)
+            photo_links = json.loads(return_photo.read())
+            image_link = photo_links['images'][0]['source']
+            urllib.urlretrieve(image_link, '{}/{} {}.jpg'.format(newpath, file_name, count))
+            log.write(photo['id'] + '\n')
+            count += 1
+            print '{} photo(s) downloaded.'.format(count)
+        if next_pointer == '':
+            break
+        else:
+            photo_list, next_pointer = get_photo_list(next_pointer)
+
 
     log.close()
     os.remove(log_file_path)

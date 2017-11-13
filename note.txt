@@ -1,4 +1,0 @@
-To do:
-Download photos from user timeline
-Handle error
-Handler next cursor
